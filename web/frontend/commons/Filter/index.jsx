@@ -4,6 +4,9 @@ import CustomButton from "../../helpers/CustomButton/index";
 import Item from "./Item";
 import { Avatar, TextStyle } from "@shopify/polaris";
 import CustomPagination from "../../helpers/Pagination";
+import { Page } from "../../apimodule/Page";
+import { RES_PER_PAGE } from "../../config";
+import { useAuthenticatedFetch } from "../../hooks";
 function ResourceListFiltersExample(props) {
   const {
     items,
@@ -14,7 +17,7 @@ function ResourceListFiltersExample(props) {
     queryValue,
     setQueryValue,
   } = props;
-
+  const fetch = useAuthenticatedFetch();
   // const [queryValue, setQueryValue] = useState("");
   const [filterStatus, setFilterStatus] = useState(["newest"]);
   const newItems = items.slice(0, 5);
@@ -36,13 +39,10 @@ function ResourceListFiltersExample(props) {
       setItems(defaultItems);
       return;
     }
-    timer.current = setTimeout(() => {
-      const filterArray = defaultItems.reduce((acc, ele) => {
-        return ele.title.toLowerCase().includes(queryValue.toLowerCase())
-          ? [...acc, ele]
-          : acc;
-      }, []);
-      setItems(filterArray);
+    timer.current = setTimeout(async () => {
+      const data = await Page.getData(1, RES_PER_PAGE, queryValue, fetch);
+      setItems(data.pageData);
+      setCurrentPage(1);
     }, 1000);
   }, [queryValue]);
 

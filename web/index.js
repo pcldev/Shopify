@@ -152,9 +152,8 @@ export async function createServer(
       });
 
       console.log("================================", req.query);
-      console.log("================================", req.params);
-      const page = req.query.page;
-      const limit = req.query.limit;
+      const page = +req.query.page;
+      const limit = +req.query.limit;
       const queryValue = req.query.queryValue;
 
       if (queryValue) {
@@ -243,6 +242,22 @@ export async function createServer(
     } catch (err) {}
   });
 
+  app.delete("/api/pages/:id", async (req, res) => {
+    const session = await Shopify.Utils.loadCurrentSession(
+      req,
+      res,
+      app.get("use-online-tokens")
+    );
+    try {
+      const pageData = await Page.delete({
+        session: session,
+        id: req.params.id,
+      });
+
+      res.status(200).json({ status: "success" });
+    } catch (err) {}
+  });
+
   app.use((req, res, next) => {
     const shop = Shopify.Utils.sanitizeShop(req.query.shop);
     if (Shopify.Context.IS_EMBEDDED_APP && shop) {
@@ -279,6 +294,7 @@ export async function createServer(
     const appInstalled = await AppInstallations.includes(shop);
 
     if (shop && !appInstalled) {
+      console.log("========", shop);
       res.redirect(`/api/auth?shop=${encodeURIComponent(shop)}`);
     } else {
       const fs = await import("fs");

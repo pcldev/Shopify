@@ -1,20 +1,27 @@
 import { Pagination } from "@shopify/polaris";
-import { Page } from "../../api/Page";
+import { Page } from "../../apimodule/Page/index";
 import { RES_PER_PAGE } from "../../config";
 import { useAuthenticatedFetch } from "../../hooks";
 const CustomPagination = (props) => {
   const fetch = useAuthenticatedFetch();
-  const { defaultItems, items, setItems, currentPage, setCurrentPage } = props;
+  const {
+    defaultItems,
+    items,
+    setItems,
+    queryValue,
+    currentPage,
+    setCurrentPage,
+  } = props;
 
   const onPreviousHandle = async () => {
     const page = currentPage - 1;
-    const data = await Page.getData(page, RES_PER_PAGE, queryValue);
+    const data = await Page.getData(page, RES_PER_PAGE, queryValue, fetch);
     setItems(data.pageData);
     setCurrentPage(currentPage - 1);
   };
   const onNextHandle = async () => {
     const page = currentPage + 1;
-    const data = await Page.getData(page, RES_PER_PAGE, queryValue);
+    const data = await Page.getData(page, RES_PER_PAGE, queryValue, fetch);
     setItems(data.pageData);
     setCurrentPage(currentPage + 1);
   };

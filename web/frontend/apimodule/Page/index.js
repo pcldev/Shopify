@@ -1,6 +1,4 @@
-import { useAuthenticatedFetch } from "../../hooks";
-const fetch = useAuthenticatedFetch();
-export const getData = async (page, limit, queryValue) => {
+export const getData = async (page, limit, queryValue, fetch) => {
   console.log("hey");
   const response = await fetch(
     `/api/pages?` +

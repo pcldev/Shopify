@@ -5,7 +5,7 @@ import ResourceListFiltersExample from "../../commons/Filter/index";
 import CustomPagination from "../../helpers/Pagination";
 import { RES_PER_PAGE } from "../../config";
 import { useAuthenticatedFetch } from "../../hooks";
-import { getData, Page, PagegetData } from "../../api/Page";
+import { Page } from "../../apimodule/Page/index";
 const tabs = [
   {
     id: "all-customers-1",
@@ -17,6 +17,7 @@ const tabs = [
 
 let defaultItems = [];
 export default function HomePageContainer() {
+  const fetch = useAuthenticatedFetch();
   const navigate = useNavigate();
   const [selected, setSelected] = useState(0);
   const [items, setItems] = useState([]);
@@ -30,7 +31,7 @@ export default function HomePageContainer() {
   console.log("rat toang");
   const fetchData = useCallback(async () => {
     console.log("yaui");
-    const data = await Page.getData(currentPage, RES_PER_PAGE, queryValue);
+    const data = await Page.getData(1, RES_PER_PAGE, queryValue, fetch);
     const responseitem = data.pageData.sort((a, b) => {
       return new Date(a.updated_at) - new Date(b.updated_at);
     });
@@ -77,6 +78,7 @@ export default function HomePageContainer() {
             }}
           >
             <CustomPagination
+              queryValue={queryValue}
               defaultItems={defaultItems}
               items={items}
               setItems={setItems}

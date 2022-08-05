@@ -22,7 +22,8 @@ const EditPageContainer = () => {
   console.log(params);
   const [title, setTitle] = useState("");
   const [editor, setEditor] = useState("");
-
+  const [typeEditor, setTypeEditor] = useState(false);
+  const [data, setData] = useState({});
   const [selected, setSelected] = useState(["hidden"]);
   const [active, setActive] = useState(false);
 
@@ -39,6 +40,7 @@ const EditPageContainer = () => {
 
   const onSubmitHandler = async () => {
     if (params.id && params.id !== "id") {
+      setTypeEditor(true);
       const response = await fetch(`/api/pages/${params.id}`, {
         method: "put",
         headers: {
@@ -51,8 +53,10 @@ const EditPageContainer = () => {
         }),
       });
       if (!response.ok) throw new Error("Cannot Create Page");
+      setTypeEditor(false);
       navigate("/", { replace: true });
       const data = await response.json();
+      setData(data.pageData);
     } else {
       const response = await fetch("/api/pages", {
         method: "post",
@@ -95,25 +99,48 @@ const EditPageContainer = () => {
     onGetPage();
   }, [onGetPage]);
 
+  const onDeletePage = useCallback(async () => {
+    const response = await fetch(`/api/pages/${params.id}`, {
+      method: "delete",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+    });
+    if (!response.ok) throw new Error("Cannot Delete Page");
+
+    navigate("/", { replace: true });
+  }, []);
+
   return (
     <div style={{ padding: "2rem", margin: "0 auto" }}>
       <div
         style={{
           display: "flex",
+          justifyContent: "space-between",
           gap: "1rem",
           alignItems: "center",
           padding: "1.25rem 0",
         }}
       >
-        <Button
-          onClick={() => {
-            navigate("/");
-          }}
-        >
-          <Icon source={ArrowLeftMinor} color="base" />
-        </Button>
+        <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
+          <Button
+            onClick={() => {
+              navigate("/");
+            }}
+          >
+            <Icon source={ArrowLeftMinor} color="base" />
+          </Button>
 
-        <Heading>Add Page</Heading>
+          <Heading>Add Page</Heading>
+        </div>
+        <div style={{ color: "#bf0711" }}>
+          {typeEditor && (
+            <Button onClick={onDeletePage} monochrome outline>
+              Delete
+            </Button>
+          )}
+        </div>
       </div>
       <div style={{ display: "flex", flexWrap: "wrap", gap: "1.25rem" }}>
         <div className="col-1">
