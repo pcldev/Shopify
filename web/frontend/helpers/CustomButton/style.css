@@ -1,0 +1,44 @@
+.active {
+  /* margin-top: 200px; */
+  visibility: visible;
+  top: 10px;
+}
+
+.nonactive {
+  /* margin-top: -200px; */
+  visibility: hidden;
+  top: -10px;
+}
+
+.padding-10 {
+  padding: 10px;
+}
+
+.overflow-hidden {
+  overflow: hidden;
+}
+
+.card-transition {
+  transition: visibility 1s ease;
+  transition: top 0.1s ease;
+}
+
+.relative {
+  position: relative;
+}
+
+.absolute {
+  position: absolute;
+}
+
+.top {
+  top: 0;
+}
+
+.height-150 {
+  height: 150px;
+}
+
+.zindex-99 {
+  z-index: 99;
+}

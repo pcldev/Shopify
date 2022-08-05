@@ -1,0 +1,12 @@
+.App {
+  font-family: sans-serif;
+  text-align: center;
+}
+
+button[title="redo"] {
+  color: red;
+}
+
+.tox-toolbar__primary {
+  justify-content: space-between;
+}
