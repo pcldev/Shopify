@@ -155,6 +155,7 @@ export async function createServer(
       const page = +req.query.page;
       const limit = +req.query.limit;
       const queryValue = req.query.queryValue;
+      const sort = req.query.sort;
 
       if (queryValue) {
         // @ts-ignore
@@ -164,6 +165,34 @@ export async function createServer(
             ? [...acc, ele]
             : acc;
         }, []);
+      }
+
+      switch (sort) {
+        case "newest":
+          pageData.sort((a, b) => {
+            return new Date(a.updated_at) - new Date(b.updated_at);
+          });
+          break;
+        case "oldest":
+          pageData.sort((a, b) => {
+            return new Date(b.updated_at) - new Date(a.updated_at);
+          });
+          break;
+        case "az":
+          pageData.sort((a, b) => {
+            return a.title.localeCompare(b.title);
+          });
+          break;
+        case "za":
+          pageData.sort((a, b) => {
+            return b.title.localeCompare(a.title);
+          });
+          break;
+        default:
+          pageData.sort((a, b) => {
+            return new Date(a.updated_at) - new Date(b.updated_at);
+          });
+          break;
       }
       if (page && limit) {
         const startPage = (+page - 1) * +limit;

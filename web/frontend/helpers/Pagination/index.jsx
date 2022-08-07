@@ -5,6 +5,9 @@ import { useAuthenticatedFetch } from "../../hooks";
 const CustomPagination = (props) => {
   const fetch = useAuthenticatedFetch();
   const {
+    loading,
+    setLoading,
+    filterStatus,
     defaultItems,
     items,
     setItems,
@@ -14,16 +17,32 @@ const CustomPagination = (props) => {
   } = props;
 
   const onPreviousHandle = async () => {
+    setLoading(true);
     const page = currentPage - 1;
-    const data = await Page.getData(page, RES_PER_PAGE, queryValue, fetch);
+    const data = await Page.getData(
+      page,
+      RES_PER_PAGE,
+      queryValue,
+      filterStatus,
+      fetch
+    );
     setItems(data.pageData);
     setCurrentPage(currentPage - 1);
+    setLoading(false);
   };
   const onNextHandle = async () => {
+    setLoading(true);
     const page = currentPage + 1;
-    const data = await Page.getData(page, RES_PER_PAGE, queryValue, fetch);
+    const data = await Page.getData(
+      page,
+      RES_PER_PAGE,
+      queryValue,
+      filterStatus,
+      fetch
+    );
     setItems(data.pageData);
     setCurrentPage(currentPage + 1);
+    setLoading(false);
   };
   return (
     <div>
