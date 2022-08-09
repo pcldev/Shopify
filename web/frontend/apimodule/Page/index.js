@@ -8,21 +8,25 @@ export const getData = async (page, limit, queryValue, sort, fetch) => {
         sort,
       })
   );
+  if (!response.ok) throw new Error("Something went wrong!");
   const data = await response.json();
   return data;
 };
 
 export const getPageDataId = async (id, fetch) => {
-  const response = await fetch(`api/pages/${id}`, {
-    method: "get",
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-    },
-  });
-
-  const data = await response.json();
-  return data;
+  try {
+    const response = await fetch(`/api/pages/${id}`, {
+      method: "get",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (!response.ok) throw new Error("Something went wrong!");
+    const data = await response.json();
+    return data;
+  } catch (err) {
+    return err.message;
+  }
 };
 
 export const updatePage = async (id, title, body_html, fetch) => {
@@ -34,7 +38,7 @@ export const updatePage = async (id, title, body_html, fetch) => {
     },
     body: JSON.stringify({ title, body_html }),
   });
-
+  if (!response.ok) throw new Error("Couldn't update page");
   const data = await response.json();
   return data;
 };
@@ -48,8 +52,20 @@ export const createPage = async (title, body_html, fetch) => {
     },
     body: JSON.stringify({ title, body_html }),
   });
+  if (!response.ok) throw new Error("Cannot Create A Page");
   const data = await response.json();
   return data;
+};
+
+export const deletePage = async (id, fetch) => {
+  const response = await fetch(`/api/pages/${id}`, {
+    method: "delete",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+  });
+  if (!response.ok) throw new Error("Cannot Delete Page");
 };
 
 export const Page = {
@@ -57,4 +73,5 @@ export const Page = {
   getPageDataId,
   updatePage,
   createPage,
+  deletePage,
 };

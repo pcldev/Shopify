@@ -1,26 +1,27 @@
-import {
-  Button,
-  Card,
-  ChoiceList,
-  Heading,
-  Icon,
-  Select,
-  TextField,
-} from "@shopify/polaris";
-import { ArrowLeftMinor } from "@shopify/polaris-icons";
-import CustomEditor from "../../helpers/Editor";
+import { Button } from "@shopify/polaris";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import Banner from "../../helpers/Banner";
+import ContextTualSaveBar from "../../helpers/ContextualSaveBar";
 import { ModalExample } from "../../helpers/Modal";
-import { createMarkup } from "../../utils";
-import { useNavigate, useParams } from "react-router-dom";
+import { ToastExample } from "../../helpers/Toast";
+import ChoicelistCard from "./ChoicelistCard";
+import FormCard from "./FormCard";
+import Header from "./Header";
 const EditPageComponent = (props) => {
   const {
     active,
     title,
+    isValid,
+    setIsValid,
     editor,
     setEditor,
     typeEditor,
     selected,
     options,
+    toastMessage,
+    setToastMessage,
+    error,
     handleSelectChange,
     handleChange,
     handleTextFieldChange,
@@ -29,87 +30,69 @@ const EditPageComponent = (props) => {
     handleChangeActiveModal,
   } = props;
   const navigate = useNavigate();
+  const [modalState, setModalState] = useState({});
+  const onHandleChangeModal = (
+    title,
+    action,
+    destructiveContent,
+    description
+  ) => {
+    handleChangeActiveModal();
+    setModalState({
+      title,
+      action,
+      description,
+      destructiveContent,
+    });
+  };
+
   return (
     <div style={{ padding: "2rem", margin: "0 auto" }}>
+      <ContextTualSaveBar
+        onClick={onSubmitHandler}
+        title={title}
+        editor={editor}
+      />
+      <ToastExample
+        message={toastMessage}
+        error={error}
+        setMessage={setToastMessage}
+      />
+      <ModalExample
+        title={modalState.title}
+        active={active}
+        action={modalState.action}
+        handleChange={handleChangeActiveModal}
+        destructiveContent={modalState.destructiveContent}
+        description={modalState.description}
+      />
+      <Header
+        active={active}
+        handleChange={handleChange}
+        onDeletePage={onDeletePage}
+        typeEditor={typeEditor}
+        handleChangeActiveModal={handleChangeActiveModal}
+        onHandleChangeModal={onHandleChangeModal}
+        title={title}
+      />
+      {!isValid && (
+        <Banner style={{ margin: "20px 0" }} content={"Title can't be blank"} />
+      )}
       <div
         style={{
           display: "flex",
-          justifyContent: "space-between",
-          gap: "1rem",
-          alignItems: "center",
-          padding: "1.25rem 0",
+          flexWrap: "wrap",
+          gap: "1.25rem",
         }}
       >
-        <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
-          <Button
-            onClick={() => {
-              navigate("/");
-            }}
-          >
-            <Icon source={ArrowLeftMinor} color="base" />
-          </Button>
-
-          <Heading>Add Page</Heading>
-        </div>
-        <div style={{ color: "#bf0711" }}>
-          {typeEditor && (
-            <Button onClick={onDeletePage} monochrome outline>
-              Delete
-            </Button>
-          )}
-        </div>
-      </div>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: "1.25rem" }}>
-        <div className="col-1">
-          <Card sectioned>
-            <TextField
-              value={title}
-              onChange={handleTextFieldChange}
-              label="Title"
-              placeholder="e.g. Contact us, Sizing chart, FAQS"
-              autoComplete="false"
-            />
-            <p style={{ marginTop: "10px" }}>Content</p>
-            <CustomEditor editor={editor} setEditor={setEditor} />
-          </Card>
-
-          <Card
-            sectioned
-            title="Search engine listing preview"
-            actions={[{ content: "Edit Page Web SEO" }]}
-          >
-            {title.trim() === "" && editor.trim() === "" && (
-              <p>
-                Add a title and description to see how this Page might appear in
-                a search engine listing
-              </p>
-            )}
-
-            {editor.trim() !== "" && title.trim() !== "" && (
-              <div>
-                <p style={{ color: "#1a0dab" }}>{title}</p>
-                <p>https://phanconglong2906store.myshopify.com/pages/{title}</p>
-                <div dangerouslySetInnerHTML={createMarkup(editor)}></div>
-              </div>
-            )}
-          </Card>
-        </div>
-        <div className="col-2">
-          <Card title="Visibility" sectioned>
-            <ChoiceList
-              title="Visibility"
-              choices={[
-                {
-                  label: "Visible (as of 8/3/2022, 2:47 PM GMT+7)",
-                  value: "visible",
-                },
-                { label: "Hidden", value: "hidden" },
-              ]}
-              selected={selected}
-              onChange={handleChange}
-            />
-          </Card>
-        </div>
+        <FormCard
+          title={title}
+          editor={editor}
+          setEditor={setEditor}
+          isValid={isValid}
+          handleTextFieldChange={handleTextFieldChange}
+        />
+        <ChoicelistCard selected={selected} handleChange={handleChange} />
       </div>
       <br />
       <div
@@ -119,10 +102,27 @@ const EditPageComponent = (props) => {
           padding: "1.25rem 0",
         }}
       >
-        <ModalExample active={active} handleChange={handleChangeActiveModal}>
-          <Button onClick={handleChangeActiveModal}>Cancel</Button>
-        </ModalExample>
-        <Button primary onClick={onSubmitHandler}>
+        <Button
+          onClick={onHandleChangeModal.bind(
+            null,
+            "You have unsaved changes",
+            () => {
+              navigate("/");
+            },
+            "Leave Page",
+            "You will loss your changes!"
+          )}
+        >
+          Cancel
+        </Button>
+
+        <Button
+          disabled={title.trim() === "" && editor.trim() === ""}
+          form="formPage"
+          submit={true}
+          primary
+          onClick={onSubmitHandler}
+        >
           Save
         </Button>
       </div>

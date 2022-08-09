@@ -9,7 +9,7 @@ export default function CustomEditor(props) {
     <>
       <Editor
         value={editor}
-        apiKey="qagffr3pkuv17a8on1afax661irst1hbr4e6tbv888sz91jc"
+        apiKey="xzojqhe78jzddg7puipu6lcyhtxx1x2xhezol3hzq1jdmp40"
         onEditorChange={(newValue, editor) => setEditor(newValue)}
         init={{
           height: 160,
@@ -37,7 +37,6 @@ export default function CustomEditor(props) {
           },
         }}
       />
-      <div dangerouslySetInnerHTML={createMarkup(editor)}></div>
     </>
   );
 }

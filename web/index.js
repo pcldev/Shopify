@@ -156,7 +156,8 @@ export async function createServer(
       const limit = +req.query.limit;
       const queryValue = req.query.queryValue;
       const sort = req.query.sort;
-
+      const result = {};
+      let pageLength = Math.ceil(pageData.length / limit);
       if (queryValue) {
         // @ts-ignore
         pageData = pageData.reduce((acc, ele) => {
@@ -165,17 +166,18 @@ export async function createServer(
             ? [...acc, ele]
             : acc;
         }, []);
+        pageLength = Math.ceil(pageData.length / limit);
       }
 
       switch (sort) {
         case "newest":
           pageData.sort((a, b) => {
-            return new Date(a.updated_at) - new Date(b.updated_at);
+            return new Date(b.updated_at) - new Date(a.updated_at);
           });
           break;
         case "oldest":
           pageData.sort((a, b) => {
-            return new Date(b.updated_at) - new Date(a.updated_at);
+            return new Date(a.updated_at) - new Date(b.updated_at);
           });
           break;
         case "az":
@@ -190,7 +192,7 @@ export async function createServer(
           break;
         default:
           pageData.sort((a, b) => {
-            return new Date(a.updated_at) - new Date(b.updated_at);
+            return new Date(b.updated_at) - new Date(a.updated_at);
           });
           break;
       }
@@ -211,23 +213,25 @@ export async function createServer(
         pageData = pageData.slice(startPage, endPage);
       }
       console.log("================================", pageData);
-
-      res.status(200).json({ pageData });
+      result.pageData = pageData;
+      result.pageLength = pageLength;
+      console.log(result);
+      res.status(200).json({ result });
     } catch (e) {}
   });
 
-  app.get("/api/pages/:id", async (req, res) => {
+  app.get("/api/pages/:yau", express.json(), async (req, res) => {
     const session = await Shopify.Utils.loadCurrentSession(
       req,
       res,
       app.get("use-online-tokens")
     );
+    console.log(req.params);
     try {
       const pageData = await Page.find({
         session: session,
-        id: req.params.id,
+        id: req.params.yau,
       });
-      console.log(req.params.id);
       res.status(200).json({ pageData });
     } catch (err) {}
   });
@@ -283,7 +287,7 @@ export async function createServer(
         id: req.params.id,
       });
 
-      res.status(200).json({ status: "success" });
+      res.status(200).json({ pageData });
     } catch (err) {}
   });
 

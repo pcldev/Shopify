@@ -1,10 +1,9 @@
-import { useCallback, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useCallback, useEffect, useRef, useState } from "react";
 
-import { RES_PER_PAGE } from "../../config";
-import { useAuthenticatedFetch } from "../../hooks";
 import { Page } from "../../apimodule/Page/index";
 import HomePageComponent from "../../components/HomePageComponent";
+import { RES_PER_PAGE } from "../../config";
+import { useAuthenticatedFetch } from "../../hooks";
 
 const tabs = [
   {
@@ -18,60 +17,106 @@ const tabs = [
 let defaultItems = [];
 export default function HomePageContainer() {
   const fetch = useAuthenticatedFetch();
-  const navigate = useNavigate();
+
   const [selected, setSelected] = useState(0);
   const [items, setItems] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
+  const [pageLength, setPageLength] = useState(1);
   const [filterStatus, setFilterStatus] = useState(["newest"]);
-  const [loading, setLoading] = useState(false);
+  const [selectedItems, setSelectedItems] = useState([]);
+  const [modalActive, setModalActive] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [toastMessage, setToastMessage] = useState("");
+  const [toastEror, setToastError] = useState(false);
 
   const [queryValue, setQueryValue] = useState("");
   const handleTabChange = (selectedTabIndex) => setSelected(selectedTabIndex);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
-    const data = await Page.getData(
-      1,
-      RES_PER_PAGE,
-      queryValue,
-      filterStatus,
-      fetch
-    );
-    const responseitem = data.pageData.sort((a, b) => {
-      return new Date(a.updated_at) - new Date(b.updated_at);
-    });
-    defaultItems = responseitem;
-    setItems(responseitem);
-    setLoading(false);
+    try {
+      const data = await Page.getData(
+        1,
+        RES_PER_PAGE,
+        queryValue,
+        filterStatus,
+        fetch
+      );
+      defaultItems = data.result.pageData;
+      setItems(data.result.pageData);
+      setPageLength(data.result.pageLength);
+      setLoading(false);
+    } catch (err) {
+      setToastMessage(err.message);
+      console.log(err);
+    }
   }, []);
 
+  const timer = useRef(null);
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    if (timer.current) {
+      clearTimeout(timer.current);
+    }
+    timer.current = setTimeout(async () => {
+      setLoading(true);
+      const data = await Page.getData(
+        1,
+        RES_PER_PAGE,
+        queryValue,
+        filterStatus,
+        fetch
+      );
+      setSelectedItems([]);
+      setItems(data.result.pageData);
+      setPageLength(data.result.pageLength);
+      setCurrentPage(1);
+      setLoading(false);
+    }, 1000);
+  }, [queryValue]);
 
   const handleFilterStatusChange = async (value) => {
     setFilterStatus(value);
     setLoading(true);
-    setCurrentPage(1);
-    const response = await Page.getData(
-      currentPage,
-      RES_PER_PAGE,
-      queryValue,
-      value[0],
-      fetch
-    );
-    const data = response.pageData;
-    setItems(data);
-    setLoading(false);
+    try {
+      const data = await Page.getData(
+        1,
+        RES_PER_PAGE,
+        queryValue,
+        value[0],
+        fetch
+      );
+      setSelectedItems([]);
+      setCurrentPage(1);
+      setItems(data.result.pageData);
+      setPageLength(data.result.pageLength);
+      setLoading(false);
+    } catch (err) {
+      console.log(err);
+      setToastMessage(err.message);
+    }
   };
+
+  const handleChangeActiveModal = useCallback(
+    () => setModalActive(!modalActive),
+    [modalActive]
+  );
   return (
     <HomePageComponent
       tabs={tabs}
       selected={selected}
       handleTabChange={handleTabChange}
       loading={loading}
+      modalActive={modalActive}
+      handleChangeActiveModal={handleChangeActiveModal}
+      setModalActive={setModalActive}
       setLoading={setLoading}
       queryValue={queryValue}
+      toastMessage={toastMessage}
+      setToastMessage={setToastMessage}
+      toastEror={toastEror}
+      setToastError={setToastError}
+      selectedItems={selectedItems}
+      setSelectedItems={setSelectedItems}
       filterStatus={filterStatus}
       handleFilterStatusChange={handleFilterStatusChange}
       setFilterStatus={setFilterStatus}
@@ -79,8 +124,11 @@ export default function HomePageContainer() {
       defaultItems={defaultItems}
       items={items}
       setItems={setItems}
+      pageLength={pageLength}
+      setPageLength={setPageLength}
       currentPage={currentPage}
       setCurrentPage={setCurrentPage}
+      fetchData={fetchData}
     />
   );
 }

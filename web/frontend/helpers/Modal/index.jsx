@@ -1,21 +1,26 @@
-import { Button, Modal, TextContainer } from "@shopify/polaris";
-import { useState, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { Modal, TextContainer } from "@shopify/polaris";
 
 export function ModalExample(props) {
-  const navigate = useNavigate();
-  const { active, handleChange } = props;
+  const {
+    active,
+    action,
+    handleChange,
+    title,
+    destructiveContent,
+    description,
+  } = props;
   return (
     <div>
       <Modal
         activator={props.children}
         open={active}
         onClose={handleChange}
-        title="You have unsaved changes"
+        title={title}
         primaryAction={{
-          content: "Leave Page",
+          destructive: true,
+          content: destructiveContent,
           onAction: () => {
-            navigate("/");
+            action();
           },
         }}
         secondaryActions={[
@@ -27,7 +32,7 @@ export function ModalExample(props) {
       >
         <Modal.Section>
           <TextContainer>
-            <p>If you leave this page, all unsaved changes will be lost.</p>
+            <p>{description}</p>
           </TextContainer>
         </Modal.Section>
       </Modal>
